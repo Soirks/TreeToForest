@@ -29,6 +29,7 @@
 - **`float`** 4 byte
 - **`double`** 8 byte
 - **`bool`** 1 byte
+- **`const char*`** 字符串
 > 可以直接使用如`2.5f`来定义单精度浮点
 > 除了0以外的任何数字都表示true
 ### 指针 
@@ -60,11 +61,9 @@
 ### do while
 #### 一个参数(循环条件)
 #### 在判断条件前先执行一遍代码
-```
-do
-{
-
-}while(condition);
+```c
+do{}
+while(condition);
 ```
 ## 流程控制
 ### `return`
@@ -78,8 +77,76 @@ do
 ### 所有指针都是一个int整数，存储内存地址的数字 1byte
 ### 原始指针 raw_point
 - `void*`无类型指针
-- `*变量名`返回变量指针地址
-- `*指针名`逆向引用指针,即访问内存地址指向的数据，可以读写
+- `&变量名`返回变内存地址,即指针
+- `*指针名`逆向引用指针,即访问内存地址指向的变量数据，可以读写
 ![alt text](image-6.png)
+## 引用
+### 使用：类型加上&
+### 定义一个虚拟变量，如
+```c
+int a = 114514;
+int& b = a;
+```
+<details>
+
+<summary>🌰栗子</summary>
+
+### 当我们想调用函数实现变量自增时，可能写出如下代码，而实际输出为5
+
+```c
+   void increase(int aaa) {
+    aaa++;
+}
+int main()
+{
+    int var = 5;
+    increase(var);
+	std::cout << var << std::endl;
+}
+```
+### 可以通过以下代码实现
+```c
+void increase(int* aaa) {
+    (*aaa)++;
+}
+int main()
+{
+    int var = 5;
+    increase(&var);
+	std::cout << var << std::endl;
+}
+```
+### 最优解为使用 引用
+```c
+void increase(int& aaa) {
+    aaa++;
+}
+int main()
+{
+    int var = 5;
+    increase(var);
+	std::cout << var << std::endl;
+}
+```
+</details>
+
+
+### 与函数别名类似，即变量别名。
+### 声明一个引用时必须赋值，且之后不能更改引用的对象。如果你需要改变，请使用指针，具体参考上述代码中的第二种方式
+## 类 class
+### 来写一个logger
+- 设置输出等级
+- 输出入口
+## 结构体 struct
+## static
+### 在类和结构外部
+#### 使用static使变量只会在该cpp文件中产生链接
+#### 而使用extern则效果相反
+#### 在头文件中声明变量时作用挺大
+### 在结构体内
+#### 被static修饰的变量将作为该类下的全局变量。任意实例下的修改将作用在全体实例上，即对player1的修改，同时作用在player23456身上
+#### 使用结构体内部的静态对象前，必须声明
 ## 内建函数
+### 默认情况下，类的成员是私有的，而结构体是公有的
+### struct多使用在存储单一数据时使用。
 - `sizeof` 内存大小(byte)
