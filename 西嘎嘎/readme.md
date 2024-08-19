@@ -182,5 +182,42 @@ A=5;B=3,C=1//若不赋值，则默认从0递增
 };
 //外部则可以直接通过A来访问数值
 ```
-## 内建函数
+## 虚函数
+### 关键字`virtual`
+### 使函数在子类能够被覆写
+### 纯虚函数`virtual int aaa()=0`
+### 要求函数必须在子类中覆写
+## 可见性
+### `private`
+### `protected`
+### `public`
+## 数组 array
+### 元素的集合
+### 定义：
+```c
+int example[5];//在栈上创建一个长度为5的int数组
+example[0] = 2;
+int* ptr = example;//数组本质是一个int指针
+*(ptr + 2)=6//example[2]=6,效果相同
+*(int*)((char*)ptr+8)=6;//与上述相同
+int* another = new int[5];//与第一句效果相同，在堆上创建，对象的生命周期更长
+delete[] another;
+```
+## 字符串
+### 本质上是一个char数组
+```c
+const char* name="soirks";//在栈上分配,不可变字符串
+char* namec="soirks";//可变字符串
+char name2[7]={'s','o','i','r','k','s',0}//效果同上，0用于告诉编译器字符串终止
+//std::string
+std::string name = "soirks";
+```
+### `"soirks"s`可以将char*类型转为标准string
+![alt text](image-7.png)
+### 多行字符串的操作
+![alt text](image-8.png)
+## 常量 const
+### 这是一个承诺，但它可以打破
+### `const int*`指针指向的数据本身不可变
+### `int* const`指针的内存地址不可变## 内建函数
 - `sizeof` 内存大小(byte)
