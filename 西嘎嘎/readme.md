@@ -1,7 +1,18 @@
-# 代码
+# c++学习笔记
+***bilibili***:
+- [【C++教程】国外大佬C++技术教程，油管百万级收藏，学C++看这个就够了！（中文字幕）】](https://www.bilibili.com/video/BV1oD4y1h7S3/?p=38&share_source=copy_web&vd_source=339e162e97a8a037c13224d541e53d6e)
+
+***YouTube***:
+- [C++ ---The Cherno](https://youtu.be/H4s55GgAg0I?si=HbTbWe_UVIKvGUu3)
+-
+## setupProject(visual studio)
+### 分清filter过滤器和folder文件夹的含义
+## 头文件
+### 用于声明函数，并在各个cpp文件中include
+### c++标准库头文件一般不包含扩展名，包含扩展名的为c标准库
 ## 编译器与连接器
 ### 定义可在其他文件中，使用函数前必须声明。
-### 定义则存在body，声明甚至可以省略命名传参，但必须指定类型。如图
+### 定义则存在body，声明甚至可以省略命名传参，但必须指定类型。如图2
 ![alt text](image.png)
 
 ![alt text](image-1.png)
@@ -20,7 +31,8 @@
 ### int 整型
 #### 4byte即32位二进制数来表示一个数字，即最大值为±2^31
 #### 使用unsigned修饰可略去符号位，表示32位二进制正数
-#### 字符与数字没有区别，通过asc码转换。
+#### 字符与数字在存储时没有区别，前者通过ascii码转换。
+![alt text](image-5.png)
 - **`char`** 1 byte 数字
 *在控制台输出中,自动将char类型的数字转换为字符串*
 - **`short`**  2 byte
@@ -32,32 +44,47 @@
 - **`const char*`** 字符串
 > 可以直接使用如`2.5f`来定义单精度浮点
 > 除了0以外的任何数字都表示true
-### 指针 
-- 在定义的变量类型后添加`*`
-### 引用
-- 在定义的变量类型后添加`&`
-![alt text](image-5.png)
-## 头文件
-### 用于声明函数，并在各个cpp文件中include
-### c++标准库头文件一般不包含扩展名，包含扩展名的为c标准库
-### 读取内存
+### 指针变量 
+#### 在定义的变量类型后添加`*`
+```c
+int* ptr;
+```
+### 引用变量
+```c++
+int a = 0;
+void aa(int& i){
+    i++;
+}
+aa(a)
+//1
+void bb(int i){
+    i++;
+}
+bb(a)
+//1
+```
+
+
 ## 条件和分支
 - `if`
 - `else`
 - `if else`
-## setupProject
-### 分清filter和folder
+
 ## 循环 loops
 ### for循环
 #### 三个参数
 - 变量声明,刚开始循环运行一次。(可以缺省，只需将i在循环前声明)
 - 循环条件
 - 下次循环发生前执行的代码
-> `for (int i = 0; i < 5; i++){}`
+```c
+for (int i = 0; i < 5; i++){}
+```
 #### 三个参数都可以缺省，发挥想象
 ### while循环
 #### 一个参数(循环条件)
-> `while (i<5){}`
+```c
+while (i<5){}
+```
 ### do while
 #### 一个参数(循环条件)
 #### 在判断条件前先执行一遍代码
@@ -65,13 +92,14 @@
 do{}
 while(condition);
 ```
+
 ## 流程控制
 ### `return`
-> 结束当前函数并返回值
+#### 结束当前函数并返回值
 ### `break`
-> 循环结束，跳出整个循环
+#### 循环结束，跳出整个循环
 ### `continue`
-> 跳转到for循环的下一次迭代。结束本次循环，并执行for的第三个参数
+#### 跳转到for循环的下一次迭代。结束本次循环，并执行for的第三个参数
  
 ## 指针
 ### 所有指针都是一个int整数，存储内存地址的数字 1byte
@@ -205,7 +233,7 @@ delete[] another;
 ```
 ## 字符串
 ### 本质上是一个char数组
-```c
+```c++
 const char* name="soirks";//在栈上分配,不可变字符串
 char* namec="soirks";//可变字符串
 char name2[7]={'s','o','i','r','k','s',0}//效果同上，0用于告诉编译器字符串终止
@@ -216,8 +244,68 @@ std::string name = "soirks";
 ![alt text](image-7.png)
 ### 多行字符串的操作
 ![alt text](image-8.png)
-## 常量 const
+## 常量 const 与 mutable
 ### 这是一个承诺，但它可以打破
 ### `const int*`指针指向的数据本身不可变
-### `int* const`指针的内存地址不可变## 内建函数
+### `int* const`指针的内存地址不可变
+### 类的成员函数声明时
+```c++
+class Entity{
+private:
+    int* a,*b;//一行声明两个指针变量时请这样做
+    mutable int c;
+public:
+    void aaa() const{//表示该函数不修改其所属类的成员
+    c = 1;//当我们将变量用mutable修饰时，则可在const函数中对其修改
+    a = nullptr;//报错！！！
+    }
+}
+//在lambda表达式中的mutable
+int a = 10;
+auto f = [=] () mutable 
+{
+    a++;
+    std::cout << a << std::endl;
+    // 11
+}
+std::cout << a << std::endl;
+//10
+//此时mutable使得在局部复制了一份全局变量
+```
+## 构造函数初始化列表 
+```c++
+//使用初始化列表能避免类成员类型为类时对象的重复创建，利于提高性能，建议习惯使用
+class Entity{
+pirvate:
+    int age,weight,height;
+public:
+    Entity()//构造函数
+    :age(8),weight(50),height(180)//初始化列表
+    {
+    }
+}
+```
+## 三元操作符
+```c++
+int level = 1;
+int speed = 2;
+
+if (level>5)
+    speed = 10;
+else
+    speed = 5;
+//等效于
+speed= level > 5 ? 10 : 5;
+//嵌套
+speed = level > 5 ? level > 10 ? 15 : 10 : 5;
+//即
+if (level>5)
+    if (level>10)
+        speed = 15;
+    else
+        speed = 10;
+else
+    speed = 5;
+```
+## 内建函数
 - `sizeof` 内存大小(byte)
