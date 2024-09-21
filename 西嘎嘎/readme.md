@@ -104,10 +104,74 @@ while(condition);
 ## 指针
 ### 所有指针都是一个int整数，存储内存地址的数字 1byte
 ### 原始指针 raw_point
-- `void*`无类型指针
+- `void*`无类型指针,不可解引用
 - `&变量名`返回变内存地址,即指针
-- `*指针名`逆向引用指针,即访问内存地址指向的变量数据，可以读写
+- `*指针名`解引用指针,即访问内存地址指向的变量数据，可以读写
+- `(数据类型)变量`显式的强制变量类型转换
+
 ![alt text](image-6.png)
+```c++
+void* ptr;
+int a = 114514;
+int* ap = &a;//假设地址为1919810
+printf(ap+1)//1919814
+```
+## 数组 array
+### 元素的集合
+### 定义：
+```c
+int example[5];//在栈上创建一个长度为5的int数组
+printf(example)//打印第一个元素的内存地址
+example[0] = 2;
+int* ptr = example;//数组本质是一个int指针
+*(ptr + 2)=6//example[2]=6,效果相同
+*(int*)((char*)ptr+8)=6;//与上述相同
+int* another = new int[5];//与第一句效果相同，在堆上创建，对象的生命周期更长
+delete[] another;
+```
+### 特别的
+#### 当数组作为传参时会被自动转换为指针类型,且并不会在新的栈上拷贝整个数组，因此在函数中也可对其进行删改
+```c++
+void aaa(int a[])
+{
+    printf(sizeof(a))//4 (byte)
+}
+int a[]={1,2,3,4,5};
+aaa(a) //4 (byte)
+printf(sizeof(a))//20 (byte)
+```
+#### 可以将数组类型作为指针类型直接使用
+### 二维数组
+```c++
+int A[2][3];//定一个一个2x3数组
+int* p = A;//这是错误的
+int* p[3] = A;// √
+printf(A,&A[0])//结果相同，可解释上行
+printf(A,*A)//结果相同，含义不同，前者表示该二位数组的头，后者表示二维数组第一个元素的头（即A[0]）
+printf(A + 1)//py数组切片？等效于去掉了A数组的第一行，指针指向了第二行
+//一定一定要把指针和数组放在一起理解
+```
+#### 等效的几个式子
+- `*A`,`A[0]`,`&A[0][0]`
+- `A+1`,`&A[1]`
+- `*(A+1)`,`A[1]`,`&A[1][0]`
+- `*(A+1)+2`，`A[1]+2`,`&A[1][2]`
+
+## 字符串
+### 本质上是一个char数组
+```c++
+char a[] = "love";
+const char* name="soirks";//在栈上分配,不可变字符串
+char* namec="soirks";//可变字符串
+char name2[7]={'s','o','i','r','k','s','\0'}//效果同上，0用于告诉编译器字符串终止
+//0与"\0"等效
+//std::string
+std::string name = "soirks";
+```
+### `"soirks"s`可以将char*类型转为标准string
+![alt text](image-7.png)
+### 多行字符串的操作
+![alt text](image-8.png)
 ## 引用
 ### 使用：类型加上&
 ### 定义一个虚拟变量，如
@@ -117,11 +181,11 @@ int& b = a;
 ```
 <details>
 
-<summary>🌰栗子</summary>
+<summary>🌰使用场景</summary>
 
 ### 当我们想调用函数实现变量自增时，可能写出如下代码，而实际输出为5
 
-```c
+```c++
    void increase(int aaa) {
     aaa++;
 }
@@ -133,7 +197,7 @@ int main()
 }
 ```
 ### 可以通过以下代码实现
-```c
+```c++
 void increase(int* aaa) {
     (*aaa)++;
 }
@@ -161,29 +225,113 @@ int main()
 
 ### 与函数别名类似，即变量别名。
 ### 声明一个引用时必须赋值，且之后不能更改引用的对象。如果你需要改变，请使用指针，具体参考上述代码中的第二种方式
+
+## new关键字
+### 在堆上分配内存
+### 返回对象指针
+### 操作符
+即可以重载
+```c++
+class Entity(){}
+int a = 2;
+int* b = new int[50]//200 bytes
+Entity* e = new Entity[50];//在栈上分配50个entity
+Entity* e = new Entity();//在栈上分配并调用构造函数
+Entity* e = (Entity*)malloc(sizeof(Entity))//在栈上分配内存但不调用构造函数，malloc来自c语言----在cpp中你不应该这么用
+delete e;//请不要忘记删除内存
+free(e)//来自c语言的删除,对应malloc分配的内存
+delete[] b//对于数组请这么删除
+
+```
+### placement new
+```c++
+Entity* e = new(b) Entity();
+```
 ## 类 class
-### 来写一个logger
+###  创建并实例化类 
+#### 在堆分配类
+```c++
+class Entity(){}
+Entity* entity = new Entity();
+//从性能来看，在栈上分配内存的效率更高，且堆上的内存必须手动释放
+delete entity;
+```
+### 来写一个logger（todo）
 - 设置输出等级
 - 输出入口
+### ->
 ### 构造函数
 #### 每一次实例化对象时都会调用该方法
 #### 定义构造函数:`类名(){}`
 #### 当定义一个private的构造函数时，则可以阻止外部创建该类的实例
 #### 或者使用`类名()=delete;`
+### 隐式构造函数、隐式转换、explicit
+```c++
+class Entity
+{
+private:
+    std::string m_Name;
+    int m_Age;
+public:
+    Entity(const std::string& name):m_Name(name),m_Age(-1){}
+    Entity(int age):m_Name("Unknown"),m_Age(age){}
+    int GetAge(){return m_Age;}
+}
+void print(Entity& e){
+    //print
+}
+Entity a("Soirks");
+Entity b(22);
+//推荐以上用法
+//以下为隐式转化
+Entity a = "Soirks";
+Entity b = 22;
+print(const Entity& a){
+    std::cout << a.GetAge << std::endl;
+}
+print("Soirks")
+print(22)
+//正常输出
+//调用函数时，编译器自动将变量通过*构造函数*隐式转化为Entity类。
+//禁用隐式转化，在构造函数前加explicit
+explicit Entity(int age):m_Name("Unknown"),m_Age(age){}
+Entity aaa = (Entity)15
+```
 ### 析构函数
 #### 当父函数结束，对象被销毁时调用
 #### 定义析构函数:`~类名(){}`
 #### 使用场景：手动在堆上改变了内存时
-### 继承
+### 构造函数初始化列表 
+```c++
+//使用初始化列表能避免类成员类型为类时对象的重复创建，利于提高性能，建议习惯使用
+class Entity{
+pirvate:
+    int age,weight,height;
+public:
+    Entity()//构造函数
+    :age(8),weight(50),height(180)//初始化列表
+    {
+    }
+}
+//代码超出类的作用域时，类会被自动销毁
+{
+
+}
+//单独一个花括号也可以形成类似函数的局部作用域
+```
+### 类的继承
 #### 从父类继承来防止代码重复
 #### 使用
-```c
+```c++
 class 子类: public 父类
 {
     
 }
 ```
 ## 结构体 struct
+### 结构体与类的唯一区别
+ 默认情况下，类的成员是私有的，而结构体是公有的
+### struct多使用在存储单一数据时使用。
 ## static
 ### 在类和结构外部
 #### 使用static使变量只会在该cpp文件中产生链接
@@ -198,8 +346,7 @@ class 子类: public 父类
 #### 该声明扩展了对象的生命周期，使其在当前父函数运行完毕后仍然存在。
 #### 二次调用函数时，无需反复创建内存，直接使用第一次创建的对象。
 #### 运用场景：在类内部通过get（）方法存储一个公用实例。
-### 默认情况下，类的成员是私有的，而结构体是公有的
-### struct多使用在存储单一数据时使用。
+
 ## 枚举 enmu
 ### 一个对象，方便用字符串代替数值，使代码可读
 ### 具体操作
@@ -219,47 +366,42 @@ A=5;B=3,C=1//若不赋值，则默认从0递增
 ### `private`
 ### `protected`
 ### `public`
-## 数组 array
-### 元素的集合
-### 定义：
-```c
-int example[5];//在栈上创建一个长度为5的int数组
-example[0] = 2;
-int* ptr = example;//数组本质是一个int指针
-*(ptr + 2)=6//example[2]=6,效果相同
-*(int*)((char*)ptr+8)=6;//与上述相同
-int* another = new int[5];//与第一句效果相同，在堆上创建，对象的生命周期更长
-delete[] another;
-```
-## 字符串
-### 本质上是一个char数组
-```c++
-const char* name="soirks";//在栈上分配,不可变字符串
-char* namec="soirks";//可变字符串
-char name2[7]={'s','o','i','r','k','s',0}//效果同上，0用于告诉编译器字符串终止
-//std::string
-std::string name = "soirks";
-```
-### `"soirks"s`可以将char*类型转为标准string
-![alt text](image-7.png)
-### 多行字符串的操作
-![alt text](image-8.png)
+
+
 ## 常量 const 与 mutable
-### 这是一个承诺，但它可以打破
+### 这是一个承诺，它可以打破
 ### `const int*`指针指向的数据本身不可变
 ### `int* const`指针的内存地址不可变
 ### 类的成员函数声明时
 ```c++
+
+
+
+const int* a =90;//禁止改变指针内容
+int* const b =new int;//禁止改变指针地址
+int const* aa = 90;//效果同1
+
+
 class Entity{
 private:
-    int* a,*b;//一行声明两个指针变量时请这样做
+    int* a,*b;//!一行声明两个指针变量时请这样做!
     mutable int c;
 public:
-    void aaa() const{//表示该函数不修改其所属类的成员
+    void aaa() const//表示该函数不修改其所属类的成员
+    {
     c = 1;//当我们将变量用mutable修饰时，则可在const函数中对其修改
     a = nullptr;//报错！！！
     }
+    const int* const rrr() const{
+        return a;
+        //返回一个不能被修改的常量指针
+    }
 }
+
+print(const entity& e){//定义了该方法不修改e对象，则该
+    e.aaa();//故该方法必须用const修饰
+}
+
 //在lambda表达式中的mutable
 int a = 10;
 auto f = [=] () mutable 
@@ -272,19 +414,7 @@ std::cout << a << std::endl;
 //10
 //此时mutable使得在局部复制了一份全局变量
 ```
-## 构造函数初始化列表 
-```c++
-//使用初始化列表能避免类成员类型为类时对象的重复创建，利于提高性能，建议习惯使用
-class Entity{
-pirvate:
-    int age,weight,height;
-public:
-    Entity()//构造函数
-    :age(8),weight(50),height(180)//初始化列表
-    {
-    }
-}
-```
+
 ## 三元操作符
 ```c++
 int level = 1;
@@ -307,5 +437,8 @@ if (level>5)
 else
     speed = 5;
 ```
+
+
+
 ## 内建函数
 - `sizeof` 内存大小(byte)
