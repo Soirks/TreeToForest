@@ -231,6 +231,8 @@ int main()
 ### 返回对象指针
 ### 操作符
 即可以重载
+
+[跳转至运算符](#ysf)
 ```c++
 class Entity(){}
 int a = 2;
@@ -259,7 +261,7 @@ delete entity;
 ### 来写一个logger（todo）
 - 设置输出等级
 - 输出入口
-### ->
+
 ### 构造函数
 #### 每一次实例化对象时都会调用该方法
 #### 定义构造函数:`类名(){}`
@@ -437,8 +439,49 @@ if (level>5)
 else
     speed = 5;
 ```
+<a id="ysf"></a>
 
-
-
+## 运算符及其重载
+```c++
+struct vector2{
+    float x,y;
+    vector2(float a , float b)
+    :x(a),y(b){}
+    vector2 operator+(const vector2& other) const
+    {
+        return vector2(a+other.x,b+other.y);
+    }
+    bool operator==(const vector2& other) const
+    {
+        return x== other.x && y == other.y;
+    }
+    bool operator!=(const vector2& other) const
+    {
+        return !(*this==other);
+    }
+};
+vector2 aa(1.2f, 1.3f);
+vector2 bb(1.3f, 1.4f);
+vector2 cc = aa + bb;//2.5 2.7
+std::ostream& operator<<(std::ostream& stream,const vector2& other)
+{
+    stream << other.x << "," << other.y;
+    return stream;
+}
+std::cout << cc << std::endl;//2.5,2.7
+```
+## this关键字
+### 在结构体内的this表示该结构体的指针 n
+### this的类型必须是const
+## ->
+访问指针对应数据的变量
+```c++
+this->x
+(*this).x
+//两者等价
+```
 ## 内建函数
 - `sizeof` 内存大小(byte)
+
+
+
