@@ -479,6 +479,177 @@ std::cout << cc << std::endl;//2.5,2.7
 this->x
 (*this).x
 //两者等价
+//↑ 90%使用场景
+//以下为操作符重载
+class ScopePtr
+{
+private:
+    Entity* m_Ptr;
+public:
+    ScopePtr(Entity* Ptr)
+    :m_Ptr(ptr){}
+    ~ScopePtr(Entity* Ptr)
+    {
+        delete m_Ptr;
+    }
+    Entity* operator->()
+    {
+        return m_pyr
+    }
+    void print() const {printf("Hello!")}
+    const Entity* operator->() const
+    {
+        return m_pyr
+    }
+}
+
+scopedPtr entity = new Entity();
+entity->Print();
+//偏移量计算
+![alt text](image-9.png)
+```
+## 栈作用域生存舟曲
+### 栈的概念
+栈上声明的东西，超出范围后就会free
+```c++
+int* CreateArray(){
+    int array[50];
+    //应当更改为=>int* array = new int[50];
+    return array;
+}
+int* a = CreateArray();//无效
+```
+### 在堆上分配的内存实现自动删除
+```c++
+class ScopePtr
+{
+private:
+    Entity* m_Ptr;
+public:
+    ScopePtr(Entity* Ptr)
+    :m_Ptr(ptr){}
+    ~ScopePtr(Entity* Ptr)
+    {
+        delete m_Ptr;
+    }
+}
+
+{
+ScopePtr e = new Entity();
+}
+//超出后e会自动销毁
+
+```
+## 智能指针（unique，shared，weak）
+调用new时，自动调用delete
+本质上为一个原始指针的包装
+```c++
+#include <memory>
+class Entity{
+    void Print(){}
+}
+{
+    std::shared_ptr<Entity> e0;
+
+    {
+    std::unique_ptr<Entity> entity(new Entity());//必须进行显示构造
+    std::unique_ptr<Entity> entity = std::make_unique<Entity>();//对于异常更安全
+    //entity对象仍存储在堆上，指针存储在栈上
+    //unique指针禁止被复制
+    //开销极小
+    entity->Print()
+
+    std::shared_ptr<Entity> sharedEntity = std::make_shared<Entity>();//请这么做，更有效率
+    e0 = sharedEntity;//可以复制
+
+    std::weak_ptr<Entity> weakEntity = e0;//他不会增加e0的引用次数，故若e0被销毁，weakEntity则会指向一个无效指针
+    }//运行到此时shareEntity(ptr)被销毁，其引用次数为1 
+}//运行到此时e0的ptr销毁，引用次数为0，则其内存被销毁
+    
+```
+## 拷贝与拷贝构造
+
+
+```c++
+ int a = 2;
+ int b = a;
+ //两者为不同的内存块
+struct Vector2
+{
+    float x,y;
+};
+Vector2 a = {2，3};
+Vector2 b = a;
+//效果同上
+Vector2* ap = new Vector2();
+Vector2* bp = ap;
+//当修改*ap的值时，*bp也会改变，两者指向同一内存 
+ap->x = 2;
+//任何使用=号的都在copy，引用类型除外（此时=为设置别名）
+//当类进行拷贝时，直接拷贝类的每一个成员
+
+//一个基本的string类
+class String
+{
+private:
+    char* m_Buffer;
+    unsigned int m_Size;
+public:
+    String(const char* string)
+    {
+        m_Size strlen(string);
+        m_Buffer = new char[m_size + 1];//！！！实际上这里有一个内存泄漏
+        //for(int i = 0;i++;i<m_Size){m_Buffer[i]=string[i]}
+        memcpy(m_Buffer,string,m_Size);//该方法更快
+        m_Buffer[m_size] = 0;
+    }
+    //拷贝构造
+    String(const String& other)
+    : m_Size(other.m_Size)
+    {
+        m_Buffer = new Char [m_Size + 1];
+        memcpy(m_Buffer,other.m_Buffer,m_Size + 1);
+    }
+    //禁止拷贝
+    //String(const String& other) = delete;
+    ~String()
+    {
+        delete[] m_Buffer; 
+    }
+    char& operator[](unsigned int index){
+        return m_Buffer[index];
+    }
+    friend std::ostream& operator<<(std::ostream& stream,const String& string);//使<<操作符为友元，则其可以读取私有成员
+}
+std::ostream& operator<<(std::ostream& stream,const String& string)
+{
+    stream <<string.m_Buffer;
+    return stream;
+}
+
+String aaa = "Soirks";
+String bbb = aaa;
+printf(aaa);
+printf(bbb);
+//Soirks
+//Soirks
+bbb[1] = 'a'
+printf(aaa);
+printf(bbb);
+//当为定义拷贝构造时：
+//Sairks
+//Sairks
+//定义拷贝构造后：
+//Soirks
+//Sairks
+//程序退出时崩溃
+//由于bbb=aaa时，对象进行了一次浅拷贝，两者成员的m_Buffer指向同一内存块
+//故对象销毁时执行了两次delete ptr;
+//第二次则变为了delete nullptr 故造成崩溃
+
+//使用拷贝构造函数进行深拷贝，解决以上问题
+//always 使用 const引用 string类型
+
 ```
 ## 内建函数
 - `sizeof` 内存大小(byte)
