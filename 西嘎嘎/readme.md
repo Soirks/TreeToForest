@@ -651,6 +651,107 @@ printf(bbb);
 //always 使用 const引用 string类型
 
 ```
+
+## 动态数组 Vector
+### 基础使用
+```c++
+include <vector>
+struct Vertex
+{
+    float x,y,z;
+}
+Vertex* aa = new Vertex[5];
+
+std::ostream& operator<<(std::ostream& stream,const Vertex& bertex)
+{
+    stream << vertex.x << "," << vertex.y << "," << vertex.z;
+    return stream;
+}
+std::vector<Vertex> bb;
+bb.push_back({1,2,3})
+bb.push_back({4,5,6})
+for(int i = 0;i<bb.size();i++)
+{
+    std::cout<< bb[i] << std::endl;
+
+}
+//以下更简洁
+for (Vertex v : bb)
+    std::cout<< v << std::endl;
+//1,2,3
+//4,5,6
+bb.clear();//清空
+bb.erase(bb.begin()+1);//移除第二项
+
+//!!!传参vector时请务必使用引用
+```
+### 如何优化vector效率
+```c++
+struct Vertex
+{
+    float x,y,z;
+    Vertex(float x,float y,float z)
+    : x(x),y(y),z(z)
+    {
+        
+    }
+    Vertex(const Vertex&)
+    {
+        std::cout << "Copy!" << std::endl;
+    }//拷贝构造
+
+}
+int main
+{
+    Vector<Vertex> a;
+    //!!!优化① 
+    bb.reserve(3) //提前告知内存大小
+    //!!!
+    //优化分析
+    a.push_back(Vertex(1,2,3))//vertex在main中创建，并且copy进vector----copy*1
+    a.push_back(Vertex(4,5,6))//vector内存不足故copy（1，2，3），（4，5，6）在main中创建copy进a————copy*2
+    a.push_back(Vertex(7,8,9))//vector内存不足故copy（1，2，3）、(3,4,5) , (7,8,9)在main中创建copy进a————copy*3
+    //无优化共输出6个copy
+    //!!!优化②
+    bb.emplace_back(1,2,3);
+    bb.emplace_back(4,5,6);
+    bb.emplace_back(7,8,9);
+    //！！！传入构造所需参数
+    //优化后，输出0 copy
+}
+
+```
+
+## 使用库 (glfw)
+### 对于重大项目
+在vs中添加库的源代码，自行编译外置库，有助于调试，也可以更改库
+### 对于快速项目
+采用链接预编译的二进制文件
+#### 32位与64位的选择
+只需要与应用程序的位数相同即可，与开发环境编译系统无关
+### 通常包含includes与libraries  
+#### 静态库
+会被放入exe文件中，更快，编译时会被优化
+#### 动态库
+以dll的形式外置，程序启动时链接
+### vs的配置（静态链接配置）
+添加外部库
+1. 在sln目录下创建denpendencies
+2. 在其中创建glfw
+3. 拖入对应vs编译的文件夹以及include
+4. 项目->属性->c++->常规->附加包含包目录->输入`$(SolutionDir)dependencies\glfw\include`
+5. 在代码中添加#include "GLFW/glfw3.h"
+链接到外部库
+1. 项目->属性->链接器->输入->附加依赖项->输入`glfw3.lib`
+2. 项目->属性->链接器->常规->附加数据库目录->输入`$(SolutionDir)dependencies\glfw\lib-vc2022`
+**注意配置时选择正确的配置**
+**注意：使用dll.lib文件时可不必使用单独的.dll**
+当我们除去include glfw
+使用 `extern "C" int glfwInit();`
+调用该函数时仍然可用，因为链接器已链接
+`int glfwInit()`不可用是因为c++混淆了函数名，而该库为c库
+
+
 ## 内建函数
 - `sizeof` 内存大小(byte)
 
