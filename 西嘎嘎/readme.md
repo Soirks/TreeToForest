@@ -745,13 +745,69 @@ int main
 1. 项目->属性->链接器->输入->附加依赖项->输入`glfw3.lib`
 2. 项目->属性->链接器->常规->附加数据库目录->输入`$(SolutionDir)dependencies\glfw\lib-vc2022`
 **注意配置时选择正确的配置**
-**注意：使用dll.lib文件时可不必使用单独的.dll**
+
 当我们除去include glfw
 使用 `extern "C" int glfwInit();`
 调用该函数时仍然可用，因为链接器已链接
 `int glfwInit()`不可用是因为c++混淆了函数名，而该库为c库
+### 动态链接
+项目设置同上，但在链接外部库时使用`glfw3dll.lib`
+请将dll粘贴到exe目录
+```c++
+#include "GLFW/glfw.h"
+
+```
+## 创建与使用库
+TODO视频：vs的最佳设置
+### 一个解决方案包含多个项目 vs配置（静态链接）
+**例：一个库项目与一个主程序项目**
+添加库：
+项目->属性->c++->常规->附加包含包目录，添加库项目目录
+即可方便在主程序项目引用头文件
+> 在解决方案内的文件建议使用“”进行include
+> 来自外部的依赖库建议使用<>进行include
+添加链接：
+右键主程序项目->添加->引用->勾选库项目，即可添加lib文件引用
+**此时**，vs已实现自动化编译流程，即编译主程序时，优先编译库文件
+## 堆与栈的内存比较
+### 都存储在ram中
+### 堆访问
+先检索空闲列表
+请求内存
+记录数据
+## 宏
+### 是什么
+使用预处理器来"宏"化操作
+在编译之前进行纯文本替换
+
+### 适用场景
+```c++
+//简单操作 stupid!!!
+#define WAIT std::cin.get()
 
 
+#ifdef _DEBUG //vs项目属性中debug模式下默认定义的变量
+#define LOG(x) std::cout << x << std::endl
+#else
+#define LOG(X)
+#endif
+//实现release禁止输出日志
+//多行define,\代表换行
+#define MAIN int main()\
+{\
+    std::cin.get();\
+}
+
+}
+int main()
+{
+    WAIT;
+    LOG("Hello");
+}
+
+//更多例子在检查opengl错误的视频里
+//高级操作 跟踪、调试、
+```
 ## 内建函数
 - `sizeof` 内存大小(byte)
 
