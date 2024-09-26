@@ -808,6 +808,68 @@ int main()
 //更多例子在检查opengl错误的视频里
 //高级操作 跟踪、调试、
 ```
+
+## 多返回值的处理
+```c++
+//传递指针
+void ccc(string* vs , string* cs)
+{
+    *vs = xxx;
+    *cs = xxx;
+}
+std::string vs,cs;
+ccc(vs,cs)
+
+//tuple 元组 不推荐
+#include <utility>
+#include <functional>
+static std::tuple<std::string,std::string> cc(const std::string& aa)
+{
+    return std::make_pair(vs,fs);
+}
+auto aaa = cc("abc");
+std::string vs = std::get<0>(aaa)
+
+//struct 墙裂推荐
+struct source
+{
+    std::srting x,y
+}
+
+source aaa(std::string aaa)
+{
+    ///xxxxx
+    return {x,y}
+}
+
+auto a = aaa("ccccc")
+a.x;
+a.y;
+//便于访问
+```
+## template 模板 (java泛型)
+```c++
+template<typename T>
+void Print(T value)
+{
+    std::cout << value << std::endl;
+}
+//函数调用时才会被创建
+Print("114514");
+Print<std::string>("114514");//编译器会自动获取类型，此处尖括号可以省略
+
+
+template<typename T，int N>
+class Array
+{
+private:
+    T m_Array[N];
+}
+Array<int,5> array;
+
+
+
+```
 ## 内建函数
 - `sizeof` 内存大小(byte)
 
