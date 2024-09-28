@@ -869,6 +869,123 @@ Array<int,5> array;
 
 
 
+
+```
+
+## auto关键字
+使用auto来声明变量，自动识别接受的变量类型
+### 你应该这样做
+```c++
+int a = 5;
+auto b = a;
+auto c = 5f;//"string" 5L
+
+std::vector<std::string> strings;
+strings.push_back("Apple");
+strings.push_back("Orange");
+for (std::vector<std::string>::iterator it = strings.begin();
+    it != strings.end();i++)//for (auto it = strings.begin();it != strings.end();i++)  更佳的做法
+{
+    std::cout << *it << std::endl;
+}
+
+
+class Device{};
+class DeviceManager
+{
+private:
+    std::unordered_map<std::string,std::vector<Device*>> m_Devices;
+public:
+    const std::unordered_map<std::string , std::vector<Device*>>& GetDevice()
+    {
+        return m_Device;
+    }
+}
+DeviceManager dm;
+const auto& device = dm.GetDevices();//这里的&是必须的
+
+
+```
+### 而不是滥用
+```c++
+//短类型不建议使用auto,这会降低代码可读性
+std::string GetName()//当这里需要改变类型时，后文就无需做出修改，对于一些s-to-c具有帮助 
+{
+    return "Soirks";
+}
+
+auto name = GetName();
+```
+## 静态数组 array
+```c++
+#include <array>
+std::array<int , 5> data;
+data[0] = 2;
+
+
+template<int T>
+void PrintArray(int* array<int,T>& data)
+{
+    for(int i = 0;i< data.size();)
+    {
+
+    }
+}
+//工作方式
+//array在栈上创建，vector在堆上创建
+//array很快，性能与原生数组一样
+//array可以记录容量大小
+```
+## 原始指针 （原始函数指针）
+```c++
+//什么是函数指针
+void HelloWorld()
+{
+    std::cout << "Hello Wolrddd!"<< std::endl;
+}
+
+auto function = HelloWorld;// 实际上为&HelloWorld,返回了函数指针
+void(*function)();//实际的类型声明
+function = HelloWorld;
+function();
+
+
+//实际的应用
+void ForEach(const std::vector<int>& vec,void(*func)(int))
+{
+    for(int value:vec)
+    {
+        func(value);
+    }
+}
+void Print(int a)
+{
+    std::cout << a <<std::endl;
+}
+std::vector<int> values = {1,2,3,4,5};
+
+ForEach(values,Print);//对于vector中的每一个元素执行一遍Print
+
+//lambda匿名函数用法
+ForEach(values,[](int value){Print(value)})
+```
+## lambda 匿名函数
+```c++
+//接上部分代码
+auto lambda = [/*capture*/](int value){/*body*/};
+//capture
+// [=] 拷贝外部所有变量
+// [&] 引用外部所有变量 
+// 单独填写变量名
+#include <functional> //原始指针无法保存定义捕获的匿名函数,请使用std::function
+std::function<void(int)& int> = [=](int value){/*body*/};
+//mutable 修改拷贝是修改函数体内还是外？
+[=](int value) mutable 
+{/*body*/}
+//将外部变量拷贝到函数体内，内部的变量可以被重新赋值，但外部变量不受影响
+//为什么我们要用匿名函数
+//更加方便 例子略
+
 ```
 ## 内建函数
 - `sizeof` 内存大小(byte)
