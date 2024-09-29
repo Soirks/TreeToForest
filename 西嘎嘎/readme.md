@@ -989,6 +989,9 @@ std::function<void(int)& int> = [=](int value){/*body*/};
 ```
 ## 内建函数
 - `sizeof` 内存大小(byte)
-
-114514
+## 为什么不用using namespace std
+### std表示来自标准库，更好分辨
+### 一定一定避免在头文件中使用using namespace
+### 避免将来可能出现的错误
+### 尽量在一个较小的作用域中使用
 
