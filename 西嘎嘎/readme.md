@@ -150,6 +150,20 @@ printf(A,&A[0])//结果相同，可解释上行
 printf(A,*A)//结果相同，含义不同，前者表示该二位数组的头，后者表示二维数组第一个元素的头（即A[0]）
 printf(A + 1)//py数组切片？等效于去掉了A数组的第一行，指针指向了第二行
 //一定一定要把指针和数组放在一起理解
+delete[][] //这样的语法不存在，删除二维数组只能一个个遍历进行删除
+int** aaa[5];//定义一个5x5的二维数组，但这五个区域不是连续的,遍历时比一维25个慢很多
+
+//相比较下遍历更快的方法
+int* array = new int[5*5]
+for(int i = 0 ; i<5;i++)
+{
+    for(int j = 0;j<5; i++)
+    {
+        array[i*5+y]=2;
+    }
+}
+
+
 ```
 #### 等效的几个式子
 - `*A`,`A[0]`,`&A[0][0]`
@@ -303,6 +317,30 @@ Entity aaa = (Entity)15
 #### 当父函数结束，对象被销毁时调用
 #### 定义析构函数:`~类名(){}`
 #### 使用场景：手动在堆上改变了内存时
+### 虚析构函数
+实际上不是覆写析构函数，而是再次添加一个虚构函数
+基本上对于基类的析构函数，一定得是虚函数
+```c++
+class Base
+{
+public:
+    Base(){}
+    ~Base(){}
+    //此时只需要标志其为虚函数即可解决下述问题
+    //virtual ~Base(){}
+}
+
+class Derived: public Base
+{
+public:
+    Derived(){}
+    ~Derived(){}
+}
+//当删除derived的实例时，两个析构函数均会调用
+Base* aaa = new Derived()
+//但是当删除aaa时，只会调用Base的析构函数
+
+```
 ### 构造函数初始化列表 
 ```c++
 //使用初始化列表能避免类成员类型为类时对象的重复创建，利于提高性能，建议习惯使用
@@ -987,6 +1025,173 @@ std::function<void(int)& int> = [=](int value){/*body*/};
 //更加方便 例子略
 
 ```
+## 线程
+```c++
+#include <thread>
+static bool s_Finish = false;
+void DoWork()
+{
+    using namespace std::literals::chrono_literals;
+    while (!s_Finished)
+    {
+        std::cout<< "Working..\n";
+        std::this_thread::sleep_for(1s);
+    }
+}
+int main()
+{
+    std::thread worker(Dowork);
+    std::cin.get();
+    s_Finish = true;
+    worker.join();//阻塞当前线程，等待工作完成，实际上是等待线程加入
+    std::cout << "Finish." << endl;
+    std::cin.get();
+}
+//实现不断输出working的同时等待回车结束。
+
+```
+## 计时
+执行代码时间
+```c++
+#include <chrono>
+#include <thread>
+using namespace std::literals::chrono_literals;
+auto start = std::chrono::high_resolution_clock::now()
+std::this_thread::sleep_for(1s);
+auto end = std::chrono::high_resolution_clock::now();
+std:;chrono::duration<float> duration = end - start;
+std::cout<< duration.count() << "s" << std::endl;
+
+struct Timer
+{
+    std::chrono::time_point<std::chrono::steady_clock> start,end;
+    std::chrono::duration<float> duration;
+    Timer()
+    {
+        start = std::chrono::high_resolution_clock::now();
+    }
+    ~Timer()
+    {
+        end = std::chrono::high_resolution_clock::now();
+        duration = end - start;
+        float ms = duration.cout()*1000.0f;
+        std::cout<<"Timer took "<< ms <<"ms" << std::endl;
+    }
+}
+//使用只需创建结构，超出作用域即可自动计时
+```
+## 排序
+```c++
+#include<vector>
+#include <algorithm>
+std::vector<int> values = {1,5,3,4,2}
+std::sort(values.begin(),values.end())//默认排序
+//自定义排序
+std::sort(values.begin(),values.end(),[](int a ,int b)//a表示当前遍历数，b表示有序数组的数
+{
+    //返回true时a排在前面
+    //返回false时b排在后面
+    //return a>b;降序
+    /*实现1排在最后，其余升序
+    if (a==1)
+        return false;
+    if(b==1)
+        return true;
+    */
+})
+for (int value:values)
+    std::cout<< value << std::endl;
+
+```
+## 类型的双关
+```C++
+int a = 50;
+double b = a;
+//此时a，b的内存地址不同
+//那么，如何直接将a内存作为double类型访问呢
+double value = *(double*)&a;//原始办法，但由于类型占用的内存大小不同，输出的值显示不是50
+
+struct Entity
+{
+    int x,y;
+}
+Entity e = {5,6};
+int *pos = (int*)&e;
+pos[0]//5
+pos[1]//6
+```
+
+## union 联合体
+```c++
+//union只能有一个成员
+//用不同的数据类型来解释同一串二进制数据
+struct Union//匿名
+{
+    union
+    {
+        float a;
+        int b;
+    };
+};
+Union u;
+u.a = 2.0f
+u.b//一大串数字
+```
+更好的例子
+```c++
+struct Vector2
+{
+    float x,y;
+}
+
+struct Vector4
+{
+    float x,y,z,w;
+    getA()
+    {
+        return *(Vector2*)&x;//四维转二维，并且无需拷贝，直接访问同一段内存
+    }
+}
+//但使用union
+struct Vector4
+{
+    union
+    {
+        struct
+        {
+            float x,y,z,w;
+        };
+        struct
+        {
+            Vector2 a,b;
+        }
+    }   
+}
+void PrintVector2(const Vector2& vec){/*xxx*/}
+Vector4 v4= {1.0f,1.2f,1.3f,1.4f}
+PrintVector(v4.a)//1 , 1.2
+v4.z = 500.0f 
+PrintVector(v4.b)//500 , 1.4
+
+```
+## 强制类型转换
+```c++
+int a = 5;
+double b = a;//隐式转换
+double c = 2.5;
+int d = (int)c///c语言风格的显示转换
+
+//c++风格的转换并没有做什么c语言风格无法做到的事情
+//增加了英文，可以被文本搜索，一定程度上减少编写时犯错的可能
+double s = static_cast<double>(a)
+
+//一种特殊的
+dynamic_cast
+//当无法转换时，会返回为null
+//下行转换：只能由父类转换为派生类
+```
+## vs的调试
+[程序运行中的调试和插入代码](https://www.bilibili.com/video/BV1oD4y1h7S3?p=70)
 ## 内建函数
 - `sizeof` 内存大小(byte)
 ## 为什么不用using namespace std
