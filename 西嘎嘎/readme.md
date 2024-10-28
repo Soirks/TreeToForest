@@ -868,6 +868,10 @@ static std::tuple<std::string,std::string> cc(const std::string& aa)
 auto aaa = cc("abc");
 std::string vs = std::get<0>(aaa)
 
+//但在cpp17中也有合适的办法-结构化绑定
+auto[data1,data2] = cc("114514","1919810")
+printf(data1,data2)
+
 //struct 墙裂推荐
 struct source
 {
@@ -912,6 +916,7 @@ Array<int,5> array;
 
 ## auto关键字
 使用auto来声明变量，自动识别接受的变量类型
+也可用于定义一个结构化绑定
 ### 你应该这样做
 ```c++
 int a = 5;
@@ -1190,6 +1195,71 @@ dynamic_cast
 //当无法转换时，会返回为null
 //下行转换：只能由父类转换为派生类
 ```
+## optional参数(cpp17)
+用于检测参数是否为空
+```c++
+#include <optional>
+#include <fstream>
+#include <iostream>
+std::optional<std::string> ReadFileAsString(const std::string& filepath)
+{
+    std::ifstream stream(filepath);
+    if (stream)
+    {
+        std::string result;
+        //read file
+        stream.close();
+        return result;
+    }
+    return {};
+}
+
+int main()
+{
+    auto data = ReadFileAsString("data.txt")
+    if(data){//检测存在
+        //print data
+    }
+    else{
+        //read error
+    }
+    std::string value = data.value_or("Not present");//设置默认值
+    
+}
+
+```
+## std::variant 单变量存储多类型数据(cpp17)
+```c++
+#include <iostream>
+#include <variant>
+std::variant<std::srting,int> data;
+data="Cherno";
+printf(std::get<std::string>(data))
+data.index()//返回所属类型索引 0
+if(auto value = std::get<std::string>(&data))
+{
+    std::string& v = *value;
+}
+else{}
+```
+### 与union不同
+①实际上，varaint创建了一个类，使可选的变量的类型成为其成员
+如上例子，占用的内存空间为string+int的和
+②从技术上讲，union仍具有更高的效率（内存占用为最大类型）
+但variant更加安全，方便，可以更自由的使用它
+## std::any 单变量存储任意类型数据(cpp17)
+```c++
+std::any data;
+data = 1;
+data = "Soirks";
+std::string& value = std::any_cast<std::string&>)(data);
+//小类型中使用union any varaint在底层逻辑运行上不会有区别
+//大类型中any会动态分配内存
+
+```
+### 他好像无用？
+![alt text](image-10.png)
+
 ## vs的调试
 [程序运行中的调试和插入代码](https://www.bilibili.com/video/BV1oD4y1h7S3?p=70)
 ## 内建函数
