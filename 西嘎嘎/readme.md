@@ -1259,6 +1259,26 @@ std::string& value = std::any_cast<std::string&>)(data);
 ```
 ### 他好像无用？
 ![alt text](image-10.png)
+## 让cpp更快--多线程异步
+```c++
+#include <future>
+static std::mutex s_meshesMutex;
+std::vector<std::future<void>> m_futures;
+static void LoadMesh(std::Vector<Ref<Mesh>>* meshes,std::string filepath)
+{
+	auto mesh = Mesh::Load(filepath);
+	//互斥mutex线程锁
+	std::lock_guard<std::mutex> lock(s_MeshesMutex);//锁定当前线程，直至函数运行完毕，自动解锁
+	meshes->push_back();
+}
+
+
+for (const auto& file : meshFilepaths)
+{
+	M_futures.push_Back(Std::async(std::launch::async,LoadMesh,&m_Meshes,file))//函数返回一个future，其被摧毁时应保证线程已完成，故需要将其返回值存储至一个vec
+	
+}
+```
 
 ## vs的调试
 [程序运行中的调试和插入代码](https://www.bilibili.com/video/BV1oD4y1h7S3?p=70)
