@@ -4,7 +4,7 @@
 
 ***YouTube***:
 - [C++ ---The Cherno](https://youtu.be/H4s55GgAg0I?si=HbTbWe_UVIKvGUu3)
--
+
 ## setupProject(visual studio)
 ### 分清filter过滤器和folder文件夹的含义
 ## 头文件
@@ -19,14 +19,14 @@
 ## 预处理
 ### vs中可以直接显示预处理后的文件
 ### 编译器通过预处理后的文件判断代码是否能够正常编译
-### **头文件**就是把文本粘贴过来。如图，编译通过，输出正确
+### `#include`**头文件**就是把文本粘贴过来。如图，编译通过，输出正确
 ![alt text](image-2.png)
 ### `#define`语句，遍历搜索并全部替换字符串，如图编译通过，输出正确
 ![alt text](image-3.png)
 ### `#if` `#endif` 语句
 ![alt text](image-4.png)
 ## 变量
-### 所有类型都是让生活变得更好的一种方式，它的本质仍是数据
+### 所有变量类型都是让生活变得更好的一种方式，它的本质仍是数据
 ### 数据类型的区别只在于创建时分配内存的多少，并不一定规定所需表示的意义
 ### int 整型
 #### 4byte即32位二进制数来表示一个数字，即最大值为±2^31
@@ -546,7 +546,7 @@ entity->Print();
 //偏移量计算
 ![alt text](image-9.png)
 ```
-## 栈作用域生存舟曲
+## 栈作用域生存周期
 ### 栈的概念
 栈上声明的东西，超出范围后就会free
 ```c++
@@ -1279,7 +1279,37 @@ for (const auto& file : meshFilepaths)
 	
 }
 ```
+## 单例模式
+### 一种组织全局变量和函数的方式
 
+```c++
+class Singleton
+{
+public:
+    static Singleton& Get() 
+    {
+        static Singleton s_Instance;//当函数调用时自动在类内部定义对象，则无需全局声明
+        return s_Instance;
+    }
+    void function(){
+        return Get().InFloat()
+    }
+private:
+    Singleton() {}//静止类的外部构造 
+    float InFloat(){}
+}
+
+//也可以实现，但会失去赋值功能
+namespace RandomCLass{
+
+}
+int main(){
+    Singleton instance = Singleton::Get()//复制单例对象
+    Singleton& instance = Singleton::Get()//应当这样使用
+}
+
+
+```
 ## vs的调试
 [程序运行中的调试和插入代码](https://www.bilibili.com/video/BV1oD4y1h7S3?p=70)
 ## 内建函数
