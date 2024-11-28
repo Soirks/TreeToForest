@@ -1279,6 +1279,36 @@ for (const auto& file : meshFilepaths)
 	
 }
 ```
+
+## 跟踪内存分配的方法
+```c++
+
+
+
+struct Memory
+{   
+    uint32_t TotalMemory = 0;
+    uint32_t TotalFreed = 0;
+    uint32_t CurrentUsage(){return TotalMemory-TotalFreed;}
+}
+static Memory s_momory;
+static void PrintMemoryUsage()
+{
+    std::cout << s_memory.CurrentUsage() << std::endl
+}
+void* operator new(size_t size)
+{
+    s_memory.TotalMemory+=size;
+    return malloc(size);
+}
+void* operator delete(void* memormy,size_t size)
+{
+    s_memory TotalFreed+=size;
+    free(memory);
+}
+
+
+```
 ## 单例模式
 ### 一种组织全局变量和函数的方式
 
